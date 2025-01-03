@@ -4,13 +4,13 @@
     <SideBar 
       class="sidebar" 
       @node-drag="handleNodeDrag"
-      :available-nodes="availableNodes" 
     />
     <div class="flow-container">
       <VueFlow 
         v-model="elements"
         :default-zoom="0"
         :default-viewport="{ x: 0, y: 0, zoom: 1 }"
+        @node-click="onSelectNode"
         @drop="onDrop"
         @dragover.prevent
         @connect="onConnect"
@@ -20,6 +20,7 @@
         :fit-view-on-init="shouldFitView"
         @nodeDataUpdate="handleNodeDataUpdate"
         @deleteNode="onDeleteNode"
+        @keydown.delete="onKeyDown"
       >
         <Background :size="1" :gap="10" pattern-color="#BDBDBD" />
         <Controls />
@@ -55,6 +56,7 @@ export default {
     const elements = ref([])
     const { project } = useVueFlow()
     const shouldFitView = ref(false)
+    const selectedNode = ref(null);
     
     const nodeTypes = {
       getticket: GetTicketNode,
@@ -67,16 +69,6 @@ export default {
     const nodes = computed(() => elements.value.filter(el => !el.source))
     const edges = computed(() => elements.value.filter(el => el.source))
 
-    const availableNodes = [
-  { type: 'start', label: 'Start Node' },
-  { type: 'end', label: 'End Node' },
-  { type: 'gateway', label: 'Gateway Node' }, 
-  { type: 'getticket', label: 'GetTicket Node' },
-  { type: 'webhook', label: 'Webhook Node' },
-  { type: 'event', label: 'Event Node' },
-  { type: 'pool', label: 'Pool Node' }
-];
-
 const onDeleteNode = (nodeId) => {
     elements.value = elements.value.filter(el => el.id !== nodeId);
     // Also remove any connected edges
@@ -85,6 +77,7 @@ const onDeleteNode = (nodeId) => {
       (el.source !== nodeId && el.target !== nodeId) : 
       true
     );
+    selectedNode.value = null;
   };
 
     return {
@@ -92,13 +85,30 @@ const onDeleteNode = (nodeId) => {
       nodeTypes,
       nodes,
       edges,
-      availableNodes,
       project,
       shouldFitView,
-      onDeleteNode
+      onDeleteNode,
+      selectedNode
     }
   },
   methods: {
+     onKeyDown(event)  {
+      if (event.key === 'Delete' || event.key === 'Backspace') {
+        if (this.selectedNode) {
+          console.log('Keydown event:', event);
+          console.log('Selected Node ID:', this.selectedNode.id);
+          this.onDeleteNode(this.selectedNode.id);
+        } else {
+          console.log('No node selected');
+        }    
+      }
+    },
+    
+  onSelectNode(nodeId) {
+    console.log('Node clicked:', nodeId);
+    this.selectedNode = this.elements.find(el => el.id === nodeId.node.id);
+    console.log('Node selected:', this.selectedNode);
+  },
    
     handleNodeDataUpdate({ id, field, value }) {
       const nodeIndex = this.elements.findIndex(el => el.id === id);
