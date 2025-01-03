@@ -29,6 +29,7 @@ export default {
   },
   methods: {
     deleteNode() {
+      console.log('delete node', this.id);
       this.$emit('deleteNode', this.id);
     }
   },

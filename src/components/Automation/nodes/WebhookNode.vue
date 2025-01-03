@@ -136,8 +136,8 @@ export default {
     },
     deleteNode() {
       // Emit nodeDelete event that will be caught by VueFlow
-      console.log('delete node', this.nodeData)
-      this.$emit('deleteNode', this.nodeData)
+      console.log('delete node', this.id)
+      this.$emit('deleteNode', this.id)
       
     },
     copyNode() {
