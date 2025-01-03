@@ -93,10 +93,8 @@ const onDeleteNode = (nodeId) => {
   },
   methods: {
      onKeyDown(event)  {
-      if (event.key === 'Delete' || event.key === 'Backspace') {
+      if (event.key === 'Delete') {
         if (this.selectedNode) {
-          console.log('Keydown event:', event);
-          console.log('Selected Node ID:', this.selectedNode.id);
           this.onDeleteNode(this.selectedNode.id);
         } else {
           console.log('No node selected');
@@ -105,9 +103,7 @@ const onDeleteNode = (nodeId) => {
     },
     
   onSelectNode(nodeId) {
-    console.log('Node clicked:', nodeId);
-    this.selectedNode = this.elements.find(el => el.id === nodeId.node.id);
-    console.log('Node selected:', this.selectedNode);
+   this.selectedNode = this.elements.find(el => el.id === nodeId.node.id);  
   },
    
     handleNodeDataUpdate({ id, field, value }) {
