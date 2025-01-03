@@ -1,4 +1,8 @@
 <template>
+  <NodeToolbar :is-visible="data.toolbarVisible" :position="data.toolbarPosition">
+    <button @click="deleteNode"><i class="fas fa-trash"></i> Delete</button>
+    <button @click="copyNode"><i class="fas fa-copy"></i> Copy</button>
+  </NodeToolbar>
   <div class="ticket-node">
     <div class="node-header">
       <span class="header-text">{{ data.label }}</span>
@@ -57,10 +61,11 @@
 
 <script>
 import { Handle } from '@vue-flow/core'
+import { NodeToolbar } from '@vue-flow/node-toolbar'
 
 export default {
   name: 'GetTicketNode',
-  components: { Handle },
+  components: { Handle, NodeToolbar },
   props: {
     data: {
       type: Object,
@@ -86,6 +91,12 @@ export default {
     }
   },
   methods: {
+    deleteNode() {
+      this.$emit('deleteNode', this.data.id);
+    },
+    copyNode() {
+      this.$emit('copyNode', this.data.id);
+    },
     updateField(field, value) {
       this.nodeData[field] = value;
       this.$emit('update:data', { ...this.nodeData });

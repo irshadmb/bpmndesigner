@@ -1,114 +1,161 @@
 <template>
-    <NodeToolbar :is-visible="data.toolbarVisible" :position="data.toolbarPosition">
-        <button><i class="fas fa-trash"></i> Delete</button>
-        <button><i class="fas fa-copy"></i> Copy</button>
-        <button><i class="fas fa-expand"></i> Expand</button>
+  <NodeToolbar 
+    :is-visible="data.toolbarVisible" 
+    :position="data.toolbarPosition"
+  >
+    <button @click="deleteNode">Delete</button>
+   
   </NodeToolbar>
-    <div class="webhook-node">
-      <div class="node-header">
-        <span class="header-text">{{ data.label }}</span>
-      </div>
-      
-      <div class="node-content">
-        <div class="field-group">
-          <label>Webhook URL</label>
-          <div class="input-wrapper">
-            <input 
-              type="text" 
-              :value="nodeData.url" 
-              @input="updateField('url', $event.target.value)"
-              placeholder="https://api.example.com/webhook"
-            />
-          </div>
-        </div>
-  
-        <div class="field-group">
-          <label>Method</label>
-          <select 
-            :value="nodeData.method" 
-            @change="updateField('method', $event.target.value)"
-            class="method-select"
-          >
-            <option value="POST">POST</option>
-            <option value="GET">GET</option>
-            <option value="PUT">PUT</option>
-            <option value="DELETE">DELETE</option>
-          </select>
-        </div>
-  
-        <div class="field-group">
-          <label>Headers</label>
-          <textarea
-            :value="nodeData.headers"
-            @input="updateField('headers', $event.target.value)"
-            placeholder="Content-Type: application/json"
-            rows="3"
-          ></textarea>
-        </div>
-  
-        <div class="field-group">
-          <label>Body</label>
-          <textarea
-            :value="nodeData.body"
-            @input="updateField('body', $event.target.value)"
-            placeholder="{}"
-            rows="4"
-          ></textarea>
+  <div 
+    class="webhook-node"
+    @mouseenter="showToolbar"
+    @mouseleave="hideToolbar"
+  >
+    <div class="node-header">
+      <span class="header-text">{{ data.label }}</span>
+    </div>
+    
+    <div class="node-content">
+      <div class="field-group">
+        <label>Webhook URL</label>
+        <div class="input-wrapper">
+          <input 
+            type="text" 
+            :value="nodeData.url" 
+            @input="updateField('url', $event.target.value)"
+            placeholder="https://api.example.com/webhook"
+          />
         </div>
       </div>
-  
-      <div class="node-footer">
-        <Handle type="target" position="left" id="left" class="handle-left" />
-        <Handle type="source" position="right" id="right" class="handle-right" />
+
+      <div class="field-group">
+        <label>Method</label>
+        <select 
+          :value="nodeData.method" 
+          @change="updateField('method', $event.target.value)"
+          class="method-select"
+        >
+          <option value="POST">POST</option>
+          <option value="GET">GET</option>
+          <option value="PUT">PUT</option>
+          <option value="DELETE">DELETE</option>
+        </select>
+      </div>
+
+      <div class="field-group">
+        <label>Headers</label>
+        <textarea
+          :value="nodeData.headers"
+          @input="updateField('headers', $event.target.value)"
+          placeholder="Content-Type: application/json"
+          rows="3"
+        ></textarea>
+      </div>
+
+      <div class="field-group">
+        <label>Body</label>
+        <textarea
+          :value="nodeData.body"
+          @input="updateField('body', $event.target.value)"
+          placeholder="{}"
+          rows="4"
+        ></textarea>
       </div>
     </div>
-  </template>
-  
-  <script>
-  import { Handle } from '@vue-flow/core'
-  import { NodeToolbar } from '@vue-flow/node-toolbar'
-  
-  export default {
-    name: 'WebhookNode',
-    components: { Handle,NodeToolbar },
-    props: {
-      data: {
-        type: Object,
-        required: true
-      },
+
+    <div class="node-footer">
+      <Handle type="target" position="left" id="left" class="handle-left" />
+      <Handle type="source" position="right" id="right" class="handle-right" />
+    </div>
+  </div>
+</template>
+
+<script>
+import { Handle } from '@vue-flow/core'
+import { NodeToolbar } from '@vue-flow/node-toolbar'
+
+export default {
+  name: 'WebhookNode',
+  components: { Handle, NodeToolbar },
+  emits: ['updateNodeInternals', 'update:data', 'nodeDelete', 'copyNode', 'nodeDataUpdate'],
+  props: {
+    id: {
+      type: String,
+      required: true
     },
-    data() {
-      return {
-        nodeData: {
-          url: this.data.url || '',
-          method: this.data.method || 'POST',
-          headers: this.data.headers || '',
-          body: this.data.body || '',
-          id: this.data.id
-        }
-      }
+    data: {
+      type: Object,
+      required: true
     },
-    watch: {
-      data: {
-        deep: true,
-        handler(newData) {
-          this.nodeData = { ...this.nodeData, ...newData }
-        }
-      }
-    },
-    methods: {
-      updateField(field, value) {
-        this.nodeData[field] = value;
-        this.$emit('update:data', { ...this.nodeData });
-        this.$emit('nodeDataUpdate', {
-          id: this.nodeData.id,
-          field,
-          value
-        });
+  },
+  setup(props, { emit }) {
+    // Your setup logic here
+
+    // Example of emitting the event
+    const updateNode = () => {
+      emit('updateNodeInternals', { /* event data */ });
+    };
+
+    return {
+      updateNode,
+    };
+  },
+  data() {
+    return {
+      nodeData: {
+        url: this.data.url || '',
+        method: this.data.method || 'POST',
+        headers: this.data.headers || '',
+        body: this.data.body || '',
+        id: this.id,
+        toolbarVisible: false,
+        toolbarPosition: { x: 0, y: -48 }
       }
     }
+  },
+  watch: {
+    data: {
+      deep: true,
+      handler(newData) {
+        this.nodeData = { ...this.nodeData, ...newData }
+      }
+    }
+  },
+  methods: {
+    showToolbar() {
+      this.$emit('update:data', { 
+        ...this.data, 
+        toolbarVisible: true 
+      })
+    },
+    hideToolbar() {
+      this.$emit('update:data', { 
+        ...this.data, 
+        toolbarVisible: false 
+      })
+    },
+    deleteNode() {
+      // Emit nodeDelete event that will be caught by VueFlow
+      console.log('delete node', this.id)
+      this.$emit('nodeDelete', this.id)
+      
+    },
+    copyNode() {
+      this.$emit('copyNode', this.id)
+    },
+    updateField(field, value) {
+      this.nodeData[field] = value
+      this.$emit('update:data', { ...this.nodeData })
+      this.$emit('nodeDataUpdate', {
+        id: this.nodeData.id,
+        field,
+        value
+      })
+    }
   }
-  </script>
+}
+</script>
+
   
   <style scoped>
  .webhook-node {
