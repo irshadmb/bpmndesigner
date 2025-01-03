@@ -30,14 +30,19 @@
 
 <script>
 import { VueFlow } from '@vue-flow/core'
-import { Background, Controls } from '@vue-flow/background'
+import { Background } from '@vue-flow/background'
 import { MiniMap } from '@vue-flow/minimap'
+import { Controls } from '@vue-flow/controls'
 import { ref, computed } from 'vue'
 import { useVueFlow } from '@vue-flow/core'
 import InputNode from './nodes/InputNode.vue'
 import OutputNode from './nodes/OutputNode.vue'
 import SideBar from './sidebar/SideBar.vue'
-import TaskNode from './nodes/TaskNode.vue'
+import GetTicketNode from './nodes/GetTicketNode.vue'
+import WebhookNode from './nodes/WebhookNode.vue'
+import StartNode from './nodes/StartNode.vue' 
+import EndNode from './nodes/EndNode.vue';
+import GatewayNode from './nodes/GatewayNode.vue'; 
 
 export default {
   name: 'AutomationPage',
@@ -56,20 +61,27 @@ export default {
     const nodeTypes = {
       input: InputNode,
       output: OutputNode,
-      task: TaskNode
-    }
+      getticket: GetTicketNode,
+      webhook: WebhookNode,
+      start: StartNode,
+      end: EndNode,
+      gateway: GatewayNode 
+    };
 
     const nodes = computed(() => elements.value.filter(el => !el.source))
     const edges = computed(() => elements.value.filter(el => el.source))
 
     const availableNodes = [
-      { type: 'input', label: 'Input Node' },
-      { type: 'output', label: 'Output Node' },
-      { type: 'task', label: 'Task Node' },
-      { type: 'gateway', label: 'Gateway Node' },
-      { type: 'event', label: 'Event Node' },
-      { type: 'pool', label: 'Pool Node' }
-    ]
+  { type: 'start', label: 'Start Node' },
+  { type: 'end', label: 'End Node' },
+  { type: 'gateway', label: 'Gateway Node' }, // Add Gateway Node
+  { type: 'input', label: 'Input Node' },
+  { type: 'output', label: 'Output Node' },
+  { type: 'getticket', label: 'GetTicket Node' },
+  { type: 'webhook', label: 'Webhook Node' },
+  { type: 'event', label: 'Event Node' },
+  { type: 'pool', label: 'Pool Node' }
+];
 
     return {
       elements,
@@ -83,13 +95,9 @@ export default {
   },
   methods: {
     handleNodeDataUpdate({ id, field, value }) {
-      // Find the node that was updated
       const nodeIndex = this.elements.findIndex(el => el.id === id);
       if (nodeIndex !== -1) {
-        // Create a new copy of elements array
         const updatedElements = [...this.elements];
-        
-        // Update the node's data
         updatedElements[nodeIndex] = {
           ...updatedElements[nodeIndex],
           data: {
@@ -97,11 +105,7 @@ export default {
             [field]: value
           }
         };
-        
-        // Find all edges where this node is the source
         const connectedEdges = this.edges.filter(edge => edge.source === id);
-        
-        // Update all connected target nodes
         connectedEdges.forEach(edge => {
           const targetIndex = updatedElements.findIndex(el => el.id === edge.target);
           if (targetIndex !== -1) {
@@ -114,8 +118,6 @@ export default {
             };
           }
         });
-        
-        // Update the elements array
         this.elements = updatedElements;
       }
     },
@@ -152,7 +154,6 @@ export default {
     },
 
     onConnect({ source, target }) {
-      // Check if an edge already exists between these nodes
       const edgeExists = this.edges.some(edge => 
         edge.source === source && edge.target === target
       );
@@ -166,10 +167,8 @@ export default {
           type: 'smoothstep',
         }
         
-        // Create a new copy of elements array with the new edge
         const updatedElements = [...this.elements, newEdge];
         
-        // If source node has data, update target node immediately
         if (sourceNode && sourceNode.data) {
           const targetIndex = updatedElements.findIndex(el => el.id === target);
           if (targetIndex !== -1) {
@@ -240,7 +239,57 @@ export default {
   position: relative;
 }
 
+:root {
+  --bg-color: #f8fafc;
+}
+
+.vue-flow {
+  background-color: var(--bg-color);
+}
+
 .vue-flow__node {
-  border-radius: 15px;
+  background: white;
+  border-radius: 16px;
+  color: #1a1a1a;
+  font-family: 'Inter', system-ui, sans-serif;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid #f0f0f0;
+}
+
+.vue-flow__handle {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  transition: transform 0.2s;
+}
+
+.vue-flow__handle:hover {
+  transform: scale(1.2);
+}
+
+.vue-flow__handle-left {
+  background: #6366f1;
+  border: 2px solid #4f46e5;
+}
+
+.vue-flow__handle-right {
+  background: #ec4899;
+  border: 2px solid #db2777;
+}
+
+.vue-flow__edge-path {
+  stroke: #6366f1;
+  stroke-width: 2;
+}
+
+.vue-flow__edge-text {
+  font-size: 12px;
+}
+
+.vue-flow__node-default {
+  padding: 12px;
+  background: white;
+  border: 2px solid #f3f4f6;
+  border-radius: 12px;
 }
 </style>
