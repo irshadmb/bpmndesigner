@@ -1,7 +1,4 @@
 <template>
-  <NodeToolbar :is-visible="data.toolbarVisible" :position="data.toolbarPosition">
-    <button @click="deleteNode"><i class="fas fa-trash"></i> Delete</button>
-  </NodeToolbar>
   <div class="start-node">
     <div class="node-circle">
       <span class="node-icon">🚀</span>
@@ -12,11 +9,10 @@
 
 <script>
 import { Handle } from '@vue-flow/core';
-import { NodeToolbar } from '@vue-flow/node-toolbar';
 
 export default {
   name: 'StartNode',
-  components: { Handle, NodeToolbar },
+  components: { Handle },
   props: {
     id: {
       type: String,
@@ -28,10 +24,7 @@ export default {
     },
   },
   methods: {
-    deleteNode() {
-      console.log('delete node', this.id);
-      this.$emit('deleteNode', this.id);
-    }
+
   },
 };
 </script>

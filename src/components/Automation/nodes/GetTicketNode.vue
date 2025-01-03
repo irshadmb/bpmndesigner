@@ -1,7 +1,4 @@
 <template>
-  <NodeToolbar :is-visible="data.toolbarVisible" :position="data.toolbarPosition">
-    <button @click="deleteNode"><i class="fas fa-trash"></i> Delete</button>
-  </NodeToolbar>
   <div class="ticket-node">
     <div class="node-header">
       <span class="header-text">{{ data.label }}</span>
@@ -60,11 +57,10 @@
 
 <script>
 import { Handle } from '@vue-flow/core'
-import { NodeToolbar } from '@vue-flow/node-toolbar'
 
 export default {
   name: 'GetTicketNode',
-  components: { Handle, NodeToolbar },
+  components: { Handle },
   props: {
     id: {
       type: String,
@@ -94,10 +90,6 @@ export default {
     }
   },
   methods: {
-    deleteNode() {
-      console.log('delete node', this.id);
-      this.$emit('deleteNode', this.id);
-    },
     updateField(field, value) {
       this.nodeData[field] = value;
       this.$emit('update:data', { ...this.nodeData });

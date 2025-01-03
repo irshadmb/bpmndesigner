@@ -1,15 +1,6 @@
 <template>
-  <NodeToolbar 
-    :is-visible="data.toolbarVisible" 
-    :position="data.toolbarPosition"
-  >
-  <button @click="deleteNode"><i class="fas fa-trash"></i> Delete</button>
-   
-  </NodeToolbar>
   <div 
     class="webhook-node"
-    @mouseenter="showToolbar"
-    @mouseleave="hideToolbar"
   >
     <div class="node-header">
       <span class="header-text">{{ data.label }}</span>
@@ -72,12 +63,11 @@
 
 <script>
 import { Handle } from '@vue-flow/core'
-import { NodeToolbar } from '@vue-flow/node-toolbar'
 
 export default {
   name: 'WebhookNode',
-  components: { Handle, NodeToolbar },
-  emits: ['updateNodeInternals', 'update:data', 'nodeDelete', 'copyNode', 'nodeDataUpdate'],
+  components: { Handle },
+  emits: ['updateNodeInternals', 'update:data', 'nodeDataUpdate'],
   props: {
     id: {
       type: String,
@@ -122,27 +112,6 @@ export default {
     }
   },
   methods: {
-    showToolbar() {
-      this.$emit('update:data', { 
-        ...this.data, 
-        toolbarVisible: true 
-      })
-    },
-    hideToolbar() {
-      this.$emit('update:data', { 
-        ...this.data, 
-        toolbarVisible: false 
-      })
-    },
-    deleteNode() {
-      // Emit nodeDelete event that will be caught by VueFlow
-      console.log('delete node', this.id)
-      this.$emit('deleteNode', this.id)
-      
-    },
-    copyNode() {
-      this.$emit('copyNode', this.id)
-    },
     updateField(field, value) {
       this.nodeData[field] = value
       this.$emit('update:data', { ...this.nodeData })
