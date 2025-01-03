@@ -19,7 +19,7 @@
         :node-types="nodeTypes"
         :fit-view-on-init="shouldFitView"
         @nodeDataUpdate="handleNodeDataUpdate"
-        @deleteNode="handleNodeDelete"
+        @deleteNode="onDeleteNode"
       >
         <Background :size="1" :gap="10" pattern-color="#BDBDBD" />
         <Controls />
@@ -77,6 +77,16 @@ export default {
   { type: 'pool', label: 'Pool Node' }
 ];
 
+const onDeleteNode = (nodeId) => {
+    elements.value = elements.value.filter(el => el.id !== nodeId);
+    // Also remove any connected edges
+    elements.value = elements.value.filter(el => 
+      el.type === 'edge' ? 
+      (el.source !== nodeId && el.target !== nodeId) : 
+      true
+    );
+  };
+
     return {
       elements,
       nodeTypes,
@@ -84,18 +94,12 @@ export default {
       edges,
       availableNodes,
       project,
-      shouldFitView
+      shouldFitView,
+      onDeleteNode
     }
   },
   methods: {
-    handleNodeDelete(id) {
-      const nodeIndex = this.elements.findIndex(el => el.id === id);
-      if (nodeIndex !== -1) {
-        const updatedElements = [...this.elements];
-        updatedElements.splice(nodeIndex, 1);
-        this.elements = updatedElements;
-      }
-    },
+   
     handleNodeDataUpdate({ id, field, value }) {
       const nodeIndex = this.elements.findIndex(el => el.id === id);
       if (nodeIndex !== -1) {
