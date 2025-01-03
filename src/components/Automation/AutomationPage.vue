@@ -10,17 +10,16 @@
       <VueFlow 
         v-model="elements"
         :default-zoom="0"
-        :default-viewport="{ x: 0, y: 0, zoom: 0 }"
+        :default-viewport="{ x: 0, y: 0, zoom: 1 }"
         @drop="onDrop"
         @dragover.prevent
         @connect="onConnect"
-        @nodeDataUpdate="handleNodeDataUpdate"
-        @nodeDelete="onNodeDelete"
-        @updateNodeInternals="handleUpdateNodeInternals" 
         :nodes="nodes"
         :edges="edges"
         :node-types="nodeTypes"
-        :fit-view-on-init="shouldFitView"        
+        :fit-view-on-init="shouldFitView"
+        @nodeDataUpdate="handleNodeDataUpdate"
+        @nodeDelete="handleNodeDelete"
       >
         <Background :size="1" :gap="10" pattern-color="#BDBDBD" />
         <Controls />
@@ -28,7 +27,6 @@
       </VueFlow>
     </div>
   </div>
-  
 </template>
 
 <script>
@@ -41,9 +39,8 @@ import SideBar from './sidebar/SideBar.vue'
 import GetTicketNode from './nodes/GetTicketNode.vue'
 import WebhookNode from './nodes/WebhookNode.vue'
 import StartNode from './nodes/StartNode.vue' 
-import EndNode from './nodes/EndNode.vue'
-import GatewayNode from './nodes/GatewayNode.vue'
-
+import EndNode from './nodes/EndNode.vue';
+import GatewayNode from './nodes/GatewayNode.vue'; 
 
 export default {
   name: 'AutomationPage',
@@ -56,9 +53,8 @@ export default {
   },
   setup() {
     const elements = ref([])
-    const { project, deleteElements } = useVueFlow()
+    const { project } = useVueFlow()
     const shouldFitView = ref(false)
-    
     
     const nodeTypes = {
       getticket: GetTicketNode,
@@ -66,20 +62,20 @@ export default {
       start: StartNode,
       end: EndNode,
       gateway: GatewayNode 
-    }
+    };
 
     const nodes = computed(() => elements.value.filter(el => !el.source))
     const edges = computed(() => elements.value.filter(el => el.source))
 
     const availableNodes = [
-      { type: 'start', label: 'Start Node' },
-      { type: 'end', label: 'End Node' },
-      { type: 'gateway', label: 'Gateway Node' },
-      { type: 'getticket', label: 'GetTicket Node' },
-      { type: 'webhook', label: 'Webhook Node' },
-      { type: 'event', label: 'Event Node' },
-      { type: 'pool', label: 'Pool Node' }
-    ]
+  { type: 'start', label: 'Start Node' },
+  { type: 'end', label: 'End Node' },
+  { type: 'gateway', label: 'Gateway Node' }, 
+  { type: 'getticket', label: 'GetTicket Node' },
+  { type: 'webhook', label: 'Webhook Node' },
+  { type: 'event', label: 'Event Node' },
+  { type: 'pool', label: 'Pool Node' }
+];
 
     return {
       elements,
@@ -88,32 +84,43 @@ export default {
       edges,
       availableNodes,
       project,
-      shouldFitView,
-      deleteElements
+      shouldFitView
     }
   },
   methods: {
-    handleUpdateNodeInternals(eventData) {
-      console.log('Node internals updated:', eventData);
-      // Handle the event data as needed
-    },
-    
-    onNodeDelete(nodeId) {
-      console.log('Node deleted:', nodeId)
-      this.nodes.value = this.nodes.value.filter((node) => node.id !== nodeId)
-   },
-
-    handleNodeDataUpdate({ id, field, value }) {
-      const nodeIndex = this.elements.findIndex(el => el.id === id)
-     console.log('Node data updated:', id, field, value)
+    handleNodeDelete(id) {
+      const nodeIndex = this.elements.findIndex(el => el.id === id);
       if (nodeIndex !== -1) {
-        this.elements[nodeIndex] = {
-          ...this.elements[nodeIndex],
+        const updatedElements = [...this.elements];
+        updatedElements.splice(nodeIndex, 1);
+        this.elements = updatedElements;
+      }
+    },
+    handleNodeDataUpdate({ id, field, value }) {
+      const nodeIndex = this.elements.findIndex(el => el.id === id);
+      if (nodeIndex !== -1) {
+        const updatedElements = [...this.elements];
+        updatedElements[nodeIndex] = {
+          ...updatedElements[nodeIndex],
           data: {
-            ...this.elements[nodeIndex].data,
+            ...updatedElements[nodeIndex].data,
             [field]: value
           }
-        }
+        };
+        const connectedEdges = this.edges.filter(edge => edge.source === id);
+        connectedEdges.forEach(edge => {
+          const targetIndex = updatedElements.findIndex(el => el.id === edge.target);
+          if (targetIndex !== -1) {
+            updatedElements[targetIndex] = {
+              ...updatedElements[targetIndex],
+              data: {
+                ...updatedElements[targetIndex].data,
+                [field]: value
+              }
+            };
+          }
+        });
+        this.elements = updatedElements;
       }
     },
 
@@ -151,10 +158,10 @@ export default {
     onConnect({ source, target }) {
       const edgeExists = this.edges.some(edge => 
         edge.source === source && edge.target === target
-      )
+      );
       
       if (!edgeExists) {
-        const sourceNode = this.nodes.find(node => node.id === source)
+        const sourceNode = this.nodes.find(node => node.id === source);
         const newEdge = {
           id: `edge-${source}-${target}`,
           source,
@@ -162,10 +169,10 @@ export default {
           type: 'smoothstep',
         }
         
-        const updatedElements = [...this.elements, newEdge]
+        const updatedElements = [...this.elements, newEdge];
         
         if (sourceNode && sourceNode.data) {
-          const targetIndex = updatedElements.findIndex(el => el.id === target)
+          const targetIndex = updatedElements.findIndex(el => el.id === target);
           if (targetIndex !== -1) {
             updatedElements[targetIndex] = {
               ...updatedElements[targetIndex],
@@ -173,11 +180,11 @@ export default {
                 ...updatedElements[targetIndex].data,
                 ...sourceNode.data
               }
-            }
+            };
           }
         }
         
-        this.elements = updatedElements
+        this.elements = updatedElements;
       }
     },
 
@@ -190,9 +197,9 @@ export default {
         nodes: this.nodes,
         edges: this.edges,
         elements: this.elements
-      }
-      console.log('Flow data:', JSON.stringify(flowData))
-    },
+      };
+      console.log('Flow data:', JSON.stringify(flowData));
+    }
   }
 }
 </script>
