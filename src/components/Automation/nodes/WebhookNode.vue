@@ -98,8 +98,6 @@ export default {
         headers: this.data.headers || '',
         body: this.data.body || '',
         id: this.id,
-        toolbarVisible: false,
-        toolbarPosition: { x: 0, y: -48 }
       }
     }
   },
