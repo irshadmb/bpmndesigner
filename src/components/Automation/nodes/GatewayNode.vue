@@ -1,8 +1,4 @@
 <template>
-    <NodeToolbar :is-visible="data.toolbarVisible" :position="data.toolbarPosition">
-      <button @click="deleteNode"><i class="fas fa-trash"></i> Delete</button>
-      <button @click="copyNode"><i class="fas fa-copy"></i> Copy</button>
-    </NodeToolbar>
     <div class="gateway-node">
       <div class="node-diamond">
         <span class="node-icon">🔀</span>
@@ -16,24 +12,22 @@
   
   <script>
   import { Handle } from '@vue-flow/core';
-  import { NodeToolbar } from '@vue-flow/node-toolbar';
   
   export default {
     name: 'GatewayNode',
-    components: { Handle, NodeToolbar },
+    components: { Handle },
     props: {
-      data: {
-        type: Object,
-        required: true,
-      },
+    id: {
+      type: String,
+      required: true
     },
+    data: {
+      type: Object,
+      required: true
+    },
+  },
     methods: {
-      deleteNode() {
-        this.$emit('deleteNode', this.data.id);
-      },
-      copyNode() {
-        this.$emit('copyNode', this.data.id);
-      },
+     
     },
   };
   </script>
@@ -108,4 +102,25 @@
   .handle-right:hover {
     transform: scale(1.2);
   }
+
+  
+button {
+  padding: 6px 12px;
+  margin: 0 4px;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  color: #4b5563;
+  font-size: 0.9em;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+button:hover {
+  background: #f9fafb;
+  border-color: #6366f1;
+  color: #6366f1;
+  box-shadow: 0 2px 4px rgba(99, 102, 241, 0.1);
+}
   </style>

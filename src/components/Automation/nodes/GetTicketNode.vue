@@ -62,10 +62,14 @@ export default {
   name: 'GetTicketNode',
   components: { Handle },
   props: {
+    id: {
+      type: String,
+      required: true
+    },
     data: {
       type: Object,
       required: true
-    }
+    },
   },
   data() {
     return {
@@ -240,5 +244,26 @@ input:focus {
   0% {background-position: 0% 50%}
   50% {background-position: 100% 50%}
   100% {background-position: 0% 50%}
+}
+
+
+button {
+  padding: 6px 12px;
+  margin: 0 4px;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  color: #4b5563;
+  font-size: 0.9em;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+button:hover {
+  background: #f9fafb;
+  border-color: #6366f1;
+  color: #6366f1;
+  box-shadow: 0 2px 4px rgba(99, 102, 241, 0.1);
 }
 </style>

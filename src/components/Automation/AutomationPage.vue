@@ -4,13 +4,13 @@
     <SideBar 
       class="sidebar" 
       @node-drag="handleNodeDrag"
-      :available-nodes="availableNodes" 
     />
     <div class="flow-container">
       <VueFlow 
         v-model="elements"
         :default-zoom="0"
         :default-viewport="{ x: 0, y: 0, zoom: 1 }"
+        @node-click="onSelectNode"
         @drop="onDrop"
         @dragover.prevent
         @connect="onConnect"
@@ -19,6 +19,8 @@
         :node-types="nodeTypes"
         :fit-view-on-init="shouldFitView"
         @nodeDataUpdate="handleNodeDataUpdate"
+        @deleteNode="onDeleteNode"
+        @keydown.delete="onKeyDown"
       >
         <Background :size="1" :gap="10" pattern-color="#BDBDBD" />
         <Controls />
@@ -29,14 +31,11 @@
 </template>
 
 <script>
-import { VueFlow } from '@vue-flow/core'
+import { VueFlow, useVueFlow } from '@vue-flow/core'
 import { Background } from '@vue-flow/background'
 import { MiniMap } from '@vue-flow/minimap'
 import { Controls } from '@vue-flow/controls'
 import { ref, computed } from 'vue'
-import { useVueFlow } from '@vue-flow/core'
-import InputNode from './nodes/InputNode.vue'
-import OutputNode from './nodes/OutputNode.vue'
 import SideBar from './sidebar/SideBar.vue'
 import GetTicketNode from './nodes/GetTicketNode.vue'
 import WebhookNode from './nodes/WebhookNode.vue'
@@ -57,10 +56,9 @@ export default {
     const elements = ref([])
     const { project } = useVueFlow()
     const shouldFitView = ref(false)
+    const selectedNode = ref(null);
     
     const nodeTypes = {
-      input: InputNode,
-      output: OutputNode,
       getticket: GetTicketNode,
       webhook: WebhookNode,
       start: StartNode,
@@ -71,29 +69,48 @@ export default {
     const nodes = computed(() => elements.value.filter(el => !el.source))
     const edges = computed(() => elements.value.filter(el => el.source))
 
-    const availableNodes = [
-  { type: 'start', label: 'Start Node' },
-  { type: 'end', label: 'End Node' },
-  { type: 'gateway', label: 'Gateway Node' }, // Add Gateway Node
-  { type: 'input', label: 'Input Node' },
-  { type: 'output', label: 'Output Node' },
-  { type: 'getticket', label: 'GetTicket Node' },
-  { type: 'webhook', label: 'Webhook Node' },
-  { type: 'event', label: 'Event Node' },
-  { type: 'pool', label: 'Pool Node' }
-];
+const onDeleteNode = (nodeId) => {
+    elements.value = elements.value.filter(el => el.id !== nodeId);
+    // Also remove any connected edges
+    elements.value = elements.value.filter(el => 
+      el.type === 'edge' ? 
+      (el.source !== nodeId && el.target !== nodeId) : 
+      true
+    );
+    selectedNode.value = null;
+  };
 
     return {
       elements,
       nodeTypes,
       nodes,
       edges,
-      availableNodes,
       project,
-      shouldFitView
+      shouldFitView,
+      onDeleteNode,
+      selectedNode
     }
   },
   methods: {
+     onKeyDown(event)  {
+      if (event.key === 'Delete') {
+        if (this.selectedNode) {
+          this.onDeleteNode(this.selectedNode.id);
+        } else {
+          console.log('No node selected');
+        }    
+      }
+    },
+    
+  onSelectNode(clickedNode) {
+    const nodeObj = clickedNode?.node;
+    if (!nodeObj?.id) {
+      console.warn('No node ID found for selection event.');
+      return;
+    }
+    this.selectedNode = this.elements.find(el => el.id === nodeObj.id);
+  },
+   
     handleNodeDataUpdate({ id, field, value }) {
       const nodeIndex = this.elements.findIndex(el => el.id === id);
       if (nodeIndex !== -1) {
