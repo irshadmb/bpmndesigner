@@ -102,8 +102,13 @@ const onDeleteNode = (nodeId) => {
       }
     },
     
-  onSelectNode(nodeId) {
-   this.selectedNode = this.elements.find(el => el.id === nodeId.node.id);  
+  onSelectNode(clickedNode) {
+    const nodeObj = clickedNode?.node;
+    if (!nodeObj?.id) {
+      console.warn('No node ID found for selection event.');
+      return;
+    }
+    this.selectedNode = this.elements.find(el => el.id === nodeObj.id);
   },
    
     handleNodeDataUpdate({ id, field, value }) {
