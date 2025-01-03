@@ -1,24 +1,16 @@
-# bpmndesigner
+BPMN Designer is a web-based application for designing and managing Business Process Model and Notation (BPMN) diagrams. This project leverages **Vue.js** and **Vue Flow** to create interactive and customizable BPMN nodes.
 
-## Project setup
-```
+## Features
+
+- Drag-and-drop interface for BPMN elements
+- Customizable nodes for various process elements
+- Interactive canvas for designing workflows
+- Modular and extensible components
+
+## Project Setup
+
+### Install Dependencies
+To install the necessary dependencies, run:
+```bash
 npm install
 ```
-
-### Compiles and hot-reloads for development
-```
-npm run serve
-```
-
-### Compiles and minifies for production
-```
-npm run build
-```
-
-### Lints and fixes files
-```
-npm run lint
-```
-
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
