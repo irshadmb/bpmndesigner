@@ -19,7 +19,7 @@
         :node-types="nodeTypes"
         :fit-view-on-init="shouldFitView"
         @nodeDataUpdate="handleNodeDataUpdate"
-        @nodeDelete="handleNodeDelete"
+        @deleteNode="handleNodeDelete"
       >
         <Background :size="1" :gap="10" pattern-color="#BDBDBD" />
         <Controls />

@@ -3,7 +3,7 @@
     :is-visible="data.toolbarVisible" 
     :position="data.toolbarPosition"
   >
-    <button @click="deleteNode">Delete</button>
+  <button @click="deleteNode"><i class="fas fa-trash"></i> Delete</button>
    
   </NodeToolbar>
   <div 
@@ -136,8 +136,8 @@ export default {
     },
     deleteNode() {
       // Emit nodeDelete event that will be caught by VueFlow
-      console.log('delete node', this.id)
-      this.$emit('nodeDelete', this.id)
+      console.log('delete node', this.nodeData)
+      this.$emit('deleteNode', this.nodeData)
       
     },
     copyNode() {
