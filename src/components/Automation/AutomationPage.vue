@@ -7,11 +7,15 @@
       @node-drag="handleNodeDrag"
     />
     <div class="flow-container">
+      <div v-if="errorMessage" class="error-message">
+        <span>{{ errorMessage }}</span>
+        <button class="close-error" @click="clearError">×</button>
+      </div>
       <VueFlow 
         v-model="elements"
-        :default-zoom="1"
-        :default-viewport="{ x: 0, y: 0, zoom: 1 }"
-        @node-click="onSelectNode"
+        :default-zoom="0"
+        :default-viewport="{ x: 0, y: 0, zoom: 0 }"
+        @node-click="onSelectNode"  
         @drop="onDrop"
         @dragover.prevent
         @connect="onConnect"
@@ -144,6 +148,11 @@ setup() {
     const { project } = useVueFlow()
     const shouldFitView = ref(false)
     const selectedNode = ref(null)
+    const errorMessage = ref('') // Add this line
+    
+    const clearError = () => {
+      errorMessage.value = ''
+    }
     
     // Define handleDirectNodeUpdate here in setup
     const handleDirectNodeUpdate = (payload) => {
@@ -238,7 +247,9 @@ setup() {
       project,
       shouldFitView,
       selectedNode,
-      handleDirectNodeUpdate // Make it available to methods if needed
+      handleDirectNodeUpdate,
+      clearError,
+      errorMessage
     }
 },
   methods: {
@@ -247,6 +258,7 @@ setup() {
       switch (nodeType) {
         case 'start':
           if (this.nodes.some(node => node.type === 'start')) {
+            this.errorMessage = 'Only one start node is allowed in the flow';
             throw new Error('Only one start node is allowed in the flow');
           }
           break;
@@ -413,7 +425,7 @@ setup() {
       // Check if flow still has a start node
       const hasStart = this.nodes.some(node => node.type === 'start');
       if (!hasStart) {
-        console.warn('Flow has no start node');
+        this.errorMessage = 'Flow has no start node';
       }
 
       // Check for orphaned nodes
@@ -423,6 +435,7 @@ setup() {
       });
 
       if (orphanedNodes.length > 0) {
+        this.errorMessage = 'Flow has orphaned nodes';
         console.warn('Flow has orphaned nodes:', orphanedNodes);
       }
     },
@@ -634,7 +647,8 @@ setup() {
       const hasStart = this.nodes.some(node => node.type === 'start');
       const hasEnd = this.nodes.some(node => node.type === 'end');
       
-      if (!hasStart || !hasEnd) {
+      if (!hasStart || !hasEnd) {        
+        this.errorMessage = 'Flow must have at least one start and one end node';
         console.error('Flow must have at least one start and one end node');
         return false;
       }
@@ -646,6 +660,7 @@ setup() {
       });
 
       if (orphanedNodes.length > 0) {
+        this.errorMessage = 'Flow has orphaned nodes';
         console.error('Flow contains orphaned nodes');
         return false;
       }
@@ -717,5 +732,35 @@ setup() {
   box-shadow: var(--node-box-shadow);
   border: 1px solid #f0f0f0;
   transition: all 0.2s ease;
+}
+
+.error-message {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background-color: #fee2e2;
+  border: 1px solid #ef4444;
+  color: #dc2626;
+  padding: 12px 20px;
+  border-radius: 8px;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  animation: slideIn 0.3s ease-out;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.close-error {
+  background: none;
+  border: none;
+  color: #dc2626;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 0 4px;
+}
+
+.close-error:hover {
+  color: #b91c1c;
 }
 </style>
