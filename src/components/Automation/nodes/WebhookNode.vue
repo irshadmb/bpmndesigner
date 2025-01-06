@@ -1,7 +1,5 @@
 <template>
-  <div 
-    class="webhook-node"
-  >
+  <div class="webhook-node">
     <div class="node-header">
       <span class="header-text">{{ data.label }}</span>
     </div>
@@ -12,7 +10,7 @@
         <div class="input-wrapper">
           <input 
             type="text" 
-            :value="nodeData.url" 
+            :value="data.url" 
             @input="updateField('url', $event.target.value)"
             placeholder="https://api.example.com/webhook"
           />
@@ -22,7 +20,7 @@
       <div class="field-group">
         <label>Method</label>
         <select 
-          :value="nodeData.method" 
+          :value="data.method" 
           @change="updateField('method', $event.target.value)"
           class="method-select"
         >
@@ -36,7 +34,7 @@
       <div class="field-group">
         <label>Headers</label>
         <textarea
-          :value="nodeData.headers"
+          :value="data.headers"
           @input="updateField('headers', $event.target.value)"
           placeholder="Content-Type: application/json"
           rows="3"
@@ -46,7 +44,7 @@
       <div class="field-group">
         <label>Body</label>
         <textarea
-          :value="nodeData.body"
+          :value="data.body"
           @input="updateField('body', $event.target.value)"
           placeholder="{}"
           rows="4"
@@ -62,12 +60,11 @@
 </template>
 
 <script>
-import { Handle } from '@vue-flow/core'
+import { Handle, useVueFlow } from '@vue-flow/core'
 
 export default {
   name: 'WebhookNode',
   components: { Handle },
-  emits: ['updateNodeInternals', 'update:data', 'nodeDataUpdate'],
   props: {
     id: {
       type: String,
@@ -78,52 +75,28 @@ export default {
       required: true
     },
   },
+  emits: ['update:data', 'nodeDataUpdate'],
   setup(props, { emit }) {
-    // Your setup logic here
+    const { updateNode } = useVueFlow()
 
-    // Example of emitting the event
-    const updateNode = () => {
-      emit('updateNodeInternals', { /* event data */ });
-    };
-
-    return {
-      updateNode,
-    };
-  },
-  data() {
-    return {
-      nodeData: {
-        url: this.data.url || '',
-        method: this.data.method || 'POST',
-        headers: this.data.headers || '',
-        body: this.data.body || '',
-        id: this.id,
-      }
-    }
-  },
-  watch: {
-    data: {
-      deep: true,
-      handler(newData) {
-        this.nodeData = { ...this.nodeData, ...newData }
-      }
-    }
-  },
-  methods: {
-    updateField(field, value) {
-      this.nodeData[field] = value
-      this.$emit('update:data', { ...this.nodeData })
-      this.$emit('nodeDataUpdate', {
-        id: this.nodeData.id,
+    function updateField(field, value) {
+      const updatedData = { ...props.data, [field]: value }
+      emit('update:data', updatedData)
+      emit('nodeDataUpdate', {
+        id: props.id,
         field,
         value
       })
+      updateNode({ id: props.id, data: updatedData })
+    }
+
+    return {
+      updateField
     }
   }
 }
 </script>
 
-  
   <style scoped>
  .webhook-node {
   background: white;

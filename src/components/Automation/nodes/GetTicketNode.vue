@@ -10,7 +10,7 @@
         <div class="toggle-switch">
           <input 
             type="checkbox" 
-            :checked="nodeData.useRequestId"
+            :checked="data.useRequestId"
             @change="updateField('useRequestId', $event.target.checked)"
             id="idToggle" 
           />
@@ -22,13 +22,13 @@
       </div>
 
       <div class="field-group">
-        <label>{{ nodeData.useRequestId ? 'Request ID' : 'Ticket ID' }}</label>
+        <label>{{ data.useRequestId ? 'Request ID' : 'Ticket ID' }}</label>
         <div class="input-wrapper">
           <input 
             type="text"
-            :value="nodeData.searchId"
-            @input="updateField('searchId', $event.target.value)"
-            :placeholder="nodeData.useRequestId ? 'Enter Request ID...' : 'Enter Ticket ID...'"
+            :value="data.ticketId"
+            @input="updateField('ticketId', $event.target.value)"
+            :placeholder="data.useRequestId ? 'Enter Request ID...' : 'Enter Ticket ID...'"
           />
           <div class="input-highlight"></div>
         </div>
@@ -39,7 +39,7 @@
         <div class="input-wrapper">
           <input 
             type="text"
-            :value="nodeData.endpoint"
+            :value="data.endpoint"
             @input="updateField('endpoint', $event.target.value)"
             placeholder="https://api.example.com/tickets"
           />
@@ -56,7 +56,7 @@
 </template>
 
 <script>
-import { Handle } from '@vue-flow/core'
+import { Handle, useVueFlow } from '@vue-flow/core'
 
 export default {
   name: 'GetTicketNode',
@@ -71,37 +71,28 @@ export default {
       required: true
     },
   },
-  data() {
-    return {
-      nodeData: {
-        useRequestId: this.data.useRequestId || false,
-        searchId: this.data.searchId || '',
-        endpoint: this.data.endpoint || '',
-        id: this.data.id
-      }
-    }
-  },
-  watch: {
-    data: {
-      deep: true,
-      handler(newData) {
-        this.nodeData = { ...this.nodeData, ...newData }
-      }
-    }
-  },
-  methods: {
-    updateField(field, value) {
-      this.nodeData[field] = value;
-      this.$emit('update:data', { ...this.nodeData });
-      this.$emit('nodeDataUpdate', {
-        id: this.nodeData.id,
+  emits: ['update:data', 'nodeDataUpdate'],
+  setup(props, { emit }) {
+    const { updateNode } = useVueFlow()
+
+    function updateField(field, value) {
+      const updatedData = { ...props.data, [field]: value }
+      emit('update:data', updatedData)
+      emit('nodeDataUpdate', {
+        id: props.id,
         field,
         value
-      });
+      })
+      updateNode({ id: props.id, data: updatedData })
+    }
+
+    return {
+      updateField
     }
   }
 }
 </script>
+
 
 <style scoped>
 .ticket-node {
