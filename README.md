@@ -42,7 +42,7 @@ npm run lint
 ```
 
 ## Project Structure
-
+```
 src/
 ├── components/
 │   └── Automation/
@@ -56,7 +56,7 @@ src/
 │           └── SideBar.vue
 ├── App.vue                  # Main application component
 └── main.js                 # Application entry point
-
+```
 ## Usage
 Launch the application using npm run serve
 Use the sidebar to select available nodes
