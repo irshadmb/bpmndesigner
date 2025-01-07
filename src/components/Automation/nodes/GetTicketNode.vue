@@ -96,7 +96,7 @@ export default {
 
 .node-header {
   padding: 16px;
-  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  background: linear-gradient(135deg, #c963f1, #f65cc8);
   border-radius: 16px 16px 0 0;
   position: relative;
 }
