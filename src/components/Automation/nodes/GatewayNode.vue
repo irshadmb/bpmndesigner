@@ -7,9 +7,24 @@
     <Handle type="target" position="left" id="target-left" class="handle-left" />
     
     <!-- Three source handles -->
-    <Handle type="source" position="right" id="source-right" class="handle-right" />
-    <Handle type="source" position="top" id="source-top" class="handle-top" />
-    <Handle type="source" position="bottom" id="source-bottom" class="handle-bottom" />
+    <Handle 
+      type="source" 
+      position="right" 
+      :id="`${id}-source-right`" 
+      class="handle-right"
+    />
+    <Handle 
+      type="source" 
+      position="top" 
+      :id="`${id}-source-top`" 
+      class="handle-top"
+    />
+    <Handle 
+      type="source" 
+      position="bottom" 
+      :id="`${id}-source-bottom`" 
+      class="handle-bottom"
+    />
   </div>
 </template>
 
@@ -122,30 +137,29 @@ export default {
   transform: translateX(-50%);
 }
 
+/* Hover states for handles */
 .handle-top:hover,
 .handle-bottom:hover,
 .handle-left:hover,
 .handle-right:hover {
   transform: scale(1.2);
+  z-index: 1000;
 }
 
-button {
-  padding: 6px 12px;
-  margin: 0 4px;
-  background: white;
-  border: 1px solid #e5e7eb;
-  border-radius: 6px;
-  color: #4b5563;
-  font-size: 0.9em;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s;
+/* Specific hover states for top and bottom handles to maintain position */
+.handle-top:hover {
+  transform: translateX(-50%) scale(1.2);
 }
 
-button:hover {
-  background: #f9fafb;
-  border-color: #6366f1;
-  color: #6366f1;
-  box-shadow: 0 2px 4px rgba(99, 102, 241, 0.1);
+.handle-bottom:hover {
+  transform: translateX(-50%) scale(1.2);
+}
+
+.handle-left:hover {
+  transform: translateY(-50%) scale(1.2);
+}
+
+.handle-right:hover {
+  transform: translateY(-50%) scale(1.2);
 }
 </style>

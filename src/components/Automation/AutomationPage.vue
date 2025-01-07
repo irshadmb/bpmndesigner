@@ -441,70 +441,110 @@ setup() {
       return this.project({ x: position.x, y: position.y })
     },
 
-    onConnect({ source, target }) {
-      // Validate connection
-      const sourceNode = this.nodes.find(node => node.id === source);
-      const targetNode = this.nodes.find(node => node.id === target);
-      
-      if (!sourceNode || !targetNode) {
-        console.error('Invalid connection: nodes not found');
-        return;
+    onConnect({ source, target, sourceHandle, targetHandle }) {
+  // Validate connection
+  const sourceNode = this.nodes.find(node => node.id === source);
+  const targetNode = this.nodes.find(node => node.id === target);
+  
+  if (!sourceNode || !targetNode) {
+    console.error('Invalid connection: nodes not found');
+    return;
+  }
+  
+  // Special handling for Gateway nodes
+  if (sourceNode.type === 'gateway') {
+    // Check which handle was used (top, right, or bottom)
+    const existingSourceConnections = this.edges.filter(edge => 
+      edge.source === source && edge.sourceHandle === sourceHandle
+    );
+
+    // Prevent multiple connections from the same handle
+    if (existingSourceConnections.length > 0) {
+      console.error('This gateway output is already connected');
+      return;
+    }
+
+    // Validate total number of output connections
+    const totalSourceConnections = this.edges.filter(edge => edge.source === source);
+    if (totalSourceConnections.length >= 3) {
+      console.error('Gateway node can have maximum 3 output connections');
+      return;
+    }
+  }
+  
+  // Handle target connections for Gateway
+  if (targetNode.type === 'gateway') {
+    const existingTargetConnections = this.edges.filter(edge => edge.target === target);
+    if (existingTargetConnections.length >= 1) {
+      console.error('Gateway node can have only 1 input connection');
+      return;
+    }
+  }
+  
+  // Check if connection already exists
+  const edgeExists = this.edges.some(edge => 
+    edge.source === source && 
+    edge.target === target &&
+    edge.sourceHandle === sourceHandle &&
+    edge.targetHandle === targetHandle
+  );
+  
+  if (edgeExists) {
+    console.warn('Connection already exists');
+    return;
+  }
+  
+  // Create new edge with metadata and handle information
+  const newEdge = {
+    id: `edge-${source}-${sourceHandle}-${target}-${Date.now()}`,
+    source,
+    target,
+    sourceHandle, // Include source handle ID
+    targetHandle, // Include target handle ID
+    type: 'smoothstep',
+    data: {
+      label: '',
+      condition: '',
+      priority: 1,
+      metadata: {
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
       }
-      
-      if (sourceNode.type === 'gateway') {
-        const existingSourceConnections = this.edges.filter(edge => edge.source === source);
-        if (existingSourceConnections.length >= 3) {
-          console.error('Gateway node can have maximum 3 source connections');
-          return;
-        }
-      }
-      
-      if (targetNode.type === 'gateway') {
-        const existingTargetConnections = this.edges.filter(edge => edge.target === target);
-        if (existingTargetConnections.length >= 1) {
-          console.error('Gateway node can have only 1 target connection');
-          return;
-        }
-      }
-      // Check if connection already exists
-      const edgeExists = this.edges.some(edge => 
-        edge.source === source && edge.target === target
-      );
-      
-      if (edgeExists) {
-        console.warn('Connection already exists');
-        return;
-      }
-      
-      // Create new edge with metadata
-      const newEdge = {
-        id: `edge-${source}-${target}`,
-        source,
-        target,
-        type: 'smoothstep',
-        data: {
-          label: '',
-          condition: '',
-          priority: 1,
-          metadata: {
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString()
-          }
-        },
-        style: {
-          stroke: '#6366f1',
-          strokeWidth: 3
-        }
-      };
-      
-      // Update elements with new edge
-      const updatedElements = [...this.elements, newEdge];
-      
-      // Propagate data if needed
-     
-      
-      this.elements = updatedElements;
     },
+    style: {
+      stroke: '#6366f1',
+      strokeWidth: 4
+    }
+  };
+  
+  // Add specific styling for gateway connections
+  if (sourceNode.type === 'gateway') {
+    newEdge.style = {
+      ...newEdge.style,
+      strokeDasharray: '5 5', // Makes the line dashed for gateway connections
+      animated: true // Optional: adds animation to the line
+    };
+    
+    // Add condition based on which handle was used
+    switch (sourceHandle) {
+      case 'source-top':
+        newEdge.data.condition = 'condition1';
+        newEdge.style.stroke = '#22c55e'; // Green for top
+        break;
+      case 'source-right':
+        newEdge.data.condition = 'condition2';
+        newEdge.style.stroke = '#3b82f6'; // Blue for right
+        break;
+      case 'source-bottom':
+        newEdge.data.condition = 'condition3';
+        newEdge.style.stroke = '#ef4444'; // Red for bottom
+        break;
+    }
+  }
+  
+  // Update elements with new edge
+  this.elements = [...this.elements, newEdge];
+},
 
     onDeleteNode(nodeId) {
       // Find the node and its connected edges
