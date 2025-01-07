@@ -40,14 +40,16 @@ import { VueFlow, useVueFlow } from '@vue-flow/core'
 import { Background } from '@vue-flow/background'
 import { MiniMap } from '@vue-flow/minimap'
 import { Controls } from '@vue-flow/controls'
-import { ref, computed } from 'vue'
+import { ref, computed, markRaw } from 'vue'
 import SideBar from './sidebar/SideBar.vue'
 import GetTicketNode from './nodes/GetTicketNode.vue'
 import WebhookNode from './nodes/WebhookNode.vue'
 import StartNode from './nodes/StartNode.vue' 
 import EndNode from './nodes/EndNode.vue'
 import GatewayNode from './nodes/GatewayNode.vue'
-import { markRaw } from 'vue';
+import PDFNode from './nodes/PDFNode.vue';
+import SQLNode from './nodes/SQLNode.vue';
+import EmailNode from './nodes/EmailNode.vue';
 
 // Node type configurations
 const NODE_CONFIGS = {
@@ -127,6 +129,43 @@ const NODE_CONFIGS = {
       errorHandling: {
         fallbackPath: 'false',
         retryEnabled: false
+      }
+    }
+  },
+  pdf: {
+    label: 'PDF Generator',
+    defaultData: {
+      templateName: '',
+      attachmentName: '',
+      template: '',
+      metadata: {
+        format: 'pdf',
+        version: '1.0'
+      }
+    }
+  },
+  sql: {
+    label: 'SQL Query',
+    defaultData: {
+      templateName: '',
+      sqlQuery: '',
+      metadata: {
+        type: 'sql',
+        version: '1.0'
+      }
+    }
+  },
+  email: {
+    label: 'Email',
+    defaultData: {
+      templateName: '',
+      emailSubject: '',
+      emailTo: '',
+      emailCC: '',
+      emailBody: '',
+      metadata: {
+        type: 'email',
+        version: '1.0'
       }
     }
   }
@@ -232,7 +271,58 @@ setup() {
           });
           return originalSetup;
         },
-      })
+      }),
+      pdf: markRaw({
+    ...PDFNode,
+    props: ['id', 'data'],
+    emits: ['update:data', 'nodeDataUpdate'],
+    setup(props, context) {
+      const originalSetup = PDFNode.setup(props, {
+        ...context,
+        emit: (event, payload) => {
+          context.emit(event, payload);
+          if (event === 'nodeDataUpdate') {
+            handleDirectNodeUpdate(payload);
+          }
+        },
+      });
+      return originalSetup;
+    },
+  }),
+  sql: markRaw({
+    ...SQLNode,
+    props: ['id', 'data'],
+    emits: ['update:data', 'nodeDataUpdate'],
+    setup(props, context) {
+      const originalSetup = SQLNode.setup(props, {
+        ...context,
+        emit: (event, payload) => {
+          context.emit(event, payload);
+          if (event === 'nodeDataUpdate') {
+            handleDirectNodeUpdate(payload);
+          }
+        },
+      });
+      return originalSetup;
+    },
+  }),
+  email: markRaw({
+    ...EmailNode,
+    props: ['id', 'data'],
+    emits: ['update:data', 'nodeDataUpdate'],
+    setup(props, context) {
+      const originalSetup = EmailNode.setup(props, {
+        ...context,
+        emit: (event, payload) => {
+          context.emit(event, payload);
+          if (event === 'nodeDataUpdate') {
+            handleDirectNodeUpdate(payload);
+          }
+        },
+      });
+      return originalSetup;
+    },
+  })
     }
 
     const nodes = computed(() => elements.value.filter(el => !el.source))
