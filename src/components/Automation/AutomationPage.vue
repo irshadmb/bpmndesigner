@@ -74,6 +74,7 @@ const NODE_CONFIGS = {
   webhook: {
     label: 'Webhook',
     defaultData: {
+      templateName: '',
       url: '',
       method: 'POST',
       headers: {

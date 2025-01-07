@@ -5,6 +5,19 @@
     </div>
     
     <div class="node-content">
+
+      <div class="field-group">
+        <label>Template Name</label>
+        <div class="input-wrapper">
+          <input 
+            type="text" 
+            :value="data.templateName" 
+            @input="updateField('templateName', $event.target.value)"
+            placeholder="template_name"
+          />
+        </div>
+      </div>
+
       <div class="field-group">
         <label>Webhook URL</label>
         <div class="input-wrapper">
@@ -16,6 +29,8 @@
           />
         </div>
       </div>
+
+      
 
       <div class="field-group">
         <label>Method</label>
