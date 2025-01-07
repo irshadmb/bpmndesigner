@@ -355,7 +355,6 @@ setup() {
           // Allow multiple end nodes
           break;
         case 'gateway':{
-        // Add gateway-specific validation
           const gatewayNodes = this.nodes.filter(node => node.type === 'gateway');
           if (gatewayNodes.length > 0) {
             // Check if existing gateways have valid connections
