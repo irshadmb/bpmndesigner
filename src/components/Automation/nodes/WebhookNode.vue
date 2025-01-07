@@ -34,9 +34,9 @@
       <div class="field-group">
         <label>Headers</label>
         <textarea
-          :value="data.headers"
+          :value="JSON.stringify(data.headers, null, 2)"
           @input="updateField('headers', $event.target.value)"
-          placeholder="Content-Type: application/json"
+          placeholder="{Content-Type: application/json}"
           rows="3"
         ></textarea>
       </div>

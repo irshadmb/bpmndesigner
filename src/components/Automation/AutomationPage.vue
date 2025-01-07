@@ -57,8 +57,7 @@ const NODE_CONFIGS = {
       ticketId: '',
       source: 'sapphire',
       fields: [],
-      useRequestId: false,
-      endpoint: '',     
+      useRequestId: false, 
       filters: {
         status: [],
         priority: [],
@@ -265,9 +264,25 @@ setup() {
         case 'end':
           // Allow multiple end nodes
           break;
-        case 'gateway':
-          // Validate gateway connections
-          break;
+        case 'gateway':{
+        // Add gateway-specific validation
+          const gatewayNodes = this.nodes.filter(node => node.type === 'gateway');
+          if (gatewayNodes.length > 0) {
+            // Check if existing gateways have valid connections
+            for (const gateway of gatewayNodes) {
+              const sourceConnections = this.edges.filter(edge => edge.source === gateway.id);
+              const targetConnections = this.edges.filter(edge => edge.target === gateway.id);
+              
+              if (sourceConnections.length > 3) {
+                throw new Error('Gateway nodes can have maximum 3 source connections');
+              }
+              if (targetConnections.length > 1) {
+                throw new Error('Gateway nodes can have only 1 target connection');
+              }
+            }
+          }
+        }
+        break;
         default:
           // General validation for other nodes
           break;
@@ -346,6 +361,21 @@ setup() {
         return;
       }
       
+      if (sourceNode.type === 'gateway') {
+        const existingSourceConnections = this.edges.filter(edge => edge.source === source);
+        if (existingSourceConnections.length >= 3) {
+          console.error('Gateway node can have maximum 3 source connections');
+          return;
+        }
+      }
+      
+      if (targetNode.type === 'gateway') {
+        const existingTargetConnections = this.edges.filter(edge => edge.target === target);
+        if (existingTargetConnections.length >= 1) {
+          console.error('Gateway node can have only 1 target connection');
+          return;
+        }
+      }
       // Check if connection already exists
       const edgeExists = this.edges.some(edge => 
         edge.source === source && edge.target === target
@@ -373,7 +403,7 @@ setup() {
         },
         style: {
           stroke: '#6366f1',
-          strokeWidth: 2
+          strokeWidth: 3
         }
       };
       
@@ -381,20 +411,7 @@ setup() {
       const updatedElements = [...this.elements, newEdge];
       
       // Propagate data if needed
-      if (sourceNode.data) {
-        const targetIndex = updatedElements.findIndex(el => el.id === target);
-        if (targetIndex !== -1) {
-          updatedElements[targetIndex] = {
-            ...updatedElements[targetIndex],
-            data: {
-              ...updatedElements[targetIndex].data,
-              // Add any data that should be propagated
-              parentId: source,
-              inheritedConfig: sourceNode.data.propagateConfig
-            }
-          };
-        }
-      }
+     
       
       this.elements = updatedElements;
     },
@@ -525,8 +542,7 @@ setup() {
                   data: {
                     ...node.data,
                     useRequestId: node.data.useRequestId || false, // Default to false if not provided
-                    ticketId: node.data.ticketId || '', // Default to empty string if not provided
-                    endpoint: node.data.endpoint || '', // Default to empty string if not provided
+                    ticketId: node.data.ticketId || '', // Default to empty string if not provided                  
                     source: node.data.source || 'sapphire', // Default to 'sapphire' if not provided
                     fields: node.data.fields || [], // Default to empty array if not provided
                     filters: node.data.filters || { // Default to empty filters if not provided
