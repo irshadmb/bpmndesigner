@@ -34,18 +34,7 @@
         </div>
       </div>
 
-      <div class="field-group">
-        <label>API Endpoint</label>
-        <div class="input-wrapper">
-          <input 
-            type="text"
-            :value="data.endpoint"
-            @input="updateField('endpoint', $event.target.value)"
-            placeholder="https://api.example.com/tickets"
-          />
-          <div class="input-highlight"></div>
-        </div>
-      </div>
+      
     </div>
 
     <div class="node-footer">
