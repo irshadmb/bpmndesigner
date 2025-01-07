@@ -87,7 +87,7 @@
   
   .node-header {
     padding: 16px;
-    background: linear-gradient(135deg, #2196F3, #1976D2);
+    background: linear-gradient(135deg, #64f321, #5bff0f);
     border-radius: 16px 16px 0 0;
   }
   
